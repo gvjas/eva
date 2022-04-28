@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "evaluation-selection"
 version = "0.1.0"
-description = ""
+description = "homework for RS School Machine Learning course"
 authors = ["gvjas <gvjasch@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 click = "^8.1.2"
+pandas = "^1.4.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
