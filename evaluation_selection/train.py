@@ -29,8 +29,10 @@ from sklearn.model_selection import cross_validate
 
 @click.option("--weights", default='uniform', type=str)
 
+@click.option("--algorithm", default='auto', type=str)
+
 def train(dataset_path: Path, random_state: int, test_size: float,
-          kfold: int, n_neighbors: int, weights: str) -> None:
+          kfold: int, n_neighbors: int, weights: str, algorithm: str) -> None:
     dataset = pd.read_csv(dataset_path)
     click.echo(f"Dataset shape: {dataset.shape}.")
     features = dataset.drop("Cover_Type", axis=1)
@@ -39,7 +41,8 @@ def train(dataset_path: Path, random_state: int, test_size: float,
         features, target, test_size=test_size, random_state=random_state
     )
 
-    classifier = KNeighborsClassifier(n_neighbors=n_neighbors, weights=weights, n_jobs=-1).fit(features_train, target_train)
+    classifier = KNeighborsClassifier(n_neighbors=n_neighbors, weights=weights, algorithm=algorithm,
+                                      n_jobs=-1).fit(features_train, target_train)
 
     target_pred = classifier.predict(features_val)
     scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
