@@ -27,5 +27,9 @@ def train(dataset_path: Path) -> None:
     classifier = KNeighborsClassifier(n_jobs=-1).fit(features_train, target_train)
 
     target_pred = classifier.predict(features_val)
-    scores = cross_validate(classifier, features_train, target_train, cv=KFold(3))
-    click.echo(f"Scores: {scores}\n")
+    scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
+    scores = cross_validate(classifier, features_train, target_train, cv=KFold(3), scoring=scoring)
+    click.echo(f"Scores: {scores}\n"
+               f"Accuracy: {scores['test_accuracy'].mean()}, "
+               f"f1 score: {scores['test_f1_macro'].mean()}, "
+               f"jaccard score {scores['test_jaccard_macro'].mean()}")
