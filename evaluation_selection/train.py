@@ -25,7 +25,9 @@ from sklearn.model_selection import cross_validate
 
 @click.option("--kfold", default=5, type=int)
 
-def train(dataset_path: Path, random_state: int, test_size: float, kfold: int) -> None:
+@click.option("--n-neighbors", default=5, type=int)
+
+def train(dataset_path: Path, random_state: int, test_size: float, kfold: int, n_neighbors: int) -> None:
     dataset = pd.read_csv(dataset_path)
     click.echo(f"Dataset shape: {dataset.shape}.")
     features = dataset.drop("Cover_Type", axis=1)
@@ -34,7 +36,7 @@ def train(dataset_path: Path, random_state: int, test_size: float, kfold: int) -
         features, target, test_size=test_size, random_state=random_state
     )
 
-    classifier = KNeighborsClassifier(n_jobs=-1).fit(features_train, target_train)
+    classifier = KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=-1).fit(features_train, target_train)
 
     target_pred = classifier.predict(features_val)
     scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
