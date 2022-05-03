@@ -100,7 +100,7 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
         get_dataset(dataset_path, test_size, random_state)
 
     with mlflow.start_run():
-        mlflow.log_param("model", model)
+        mlflow.log_param("model", model.upper())
         if model == 'rfc':
             pipeline = create_pipeline_rfc(use_scaler=use_scaler, use_threshold=use_threshold, use_kbest=use_kbest, n_pca=n_pca,
                 use_sfm=use_sfm, n_estimators=n_estimators, criterion=criterion, max_depth=max_depth, bootstrap=bootstrap,
@@ -123,6 +123,8 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
         mlflow.log_param("use_threshold", use_threshold)
         mlflow.log_param("use_scaler", use_scaler)
         mlflow.log_param("n_pca", n_pca)
+        mlflow.log_param("use_sfm", use_sfm)
+        mlflow.log_param("use_kbest", use_kbest)
         scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
         scores = cross_validate(pipeline, features_train, target_train, cv=KFold(kfold), scoring=scoring)
         mlflow.log_metric("accuracy", scores['test_accuracy'].mean())
