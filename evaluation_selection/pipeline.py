@@ -1,17 +1,15 @@
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, OrdinalEncoder, OneHotEncoder,MaxAbsScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2,  f_classif, mutual_info_classif
+from sklearn.feature_selection import mutual_info_classif
 
-from sklearn.feature_selection import VarianceThreshold, SelectFromModel, RFECV, SequentialFeatureSelector
+from sklearn.feature_selection import VarianceThreshold, SelectFromModel
 
-def create_pipeline_knn(
-    use_threshold: bool, use_scaler: bool, n_neighbors: int, weights: str, algorithm: str,
-    n_pca: int
-) -> Pipeline:
+def pipe_selectors(use_threshold: bool, use_scaler: bool, use_kbest: bool, use_sfm: bool,
+                   n_pca: int, random_state: int):
     pipeline_steps = []
     if use_threshold:
         pipeline_steps.append(("threshold", VarianceThreshold(0.01)))
@@ -19,6 +17,19 @@ def create_pipeline_knn(
         pipeline_steps.append(("scaler", StandardScaler()))
     if n_pca:
         pipeline_steps.append(("pca", PCA(n_components=n_pca)))
+    if use_kbest:
+        pipeline_steps.append(("kbest", SelectKBest(mutual_info_classif)))
+    if use_sfm:
+        selection_model = ExtraTreesClassifier(random_state=random_state)
+        pipeline_steps.append(("sfm",  SelectFromModel(selection_model)))
+    return pipeline_steps
+
+def create_pipeline_knn(
+    use_threshold: bool, use_scaler: bool, use_kbest: bool, use_sfm: bool, n_neighbors: int, weights: str,
+    algorithm: str, n_pca: int, random_state: int
+) -> Pipeline:
+    pipeline_steps = pipe_selectors(use_threshold, use_scaler, use_kbest, use_sfm,
+                   n_pca, random_state)
 
     pipeline_steps.append(
         (
@@ -29,18 +40,12 @@ def create_pipeline_knn(
     )
     return Pipeline(steps=pipeline_steps)
 
-
 def create_pipeline_rfc(
-    use_scaler: bool, use_threshold: bool, n_estimators: int, n_pca: int,
+    use_scaler: bool, use_threshold: bool, use_kbest: bool, n_pca: int, use_sfm: bool, n_estimators: int,
         criterion: str, max_depth: int, bootstrap: bool, random_state: int
 ) -> Pipeline:
-    pipeline_steps = []
-    if use_threshold:
-        pipeline_steps.append(("threshold", VarianceThreshold(0.01)))
-    if use_scaler:
-        pipeline_steps.append(("scaler", StandardScaler()))
-    if n_pca:
-        pipeline_steps.append(("pca", PCA(n_components=n_pca)))
+    pipeline_steps = pipe_selectors(use_threshold, use_scaler, use_kbest, use_sfm,
+                   n_pca, random_state)
 
     pipeline_steps.append(
         (

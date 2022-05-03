@@ -53,6 +53,20 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
     type=int,
 )
 
+@click.option(
+    "-kbest",
+    "--use-kbest",
+    default=False,
+    type=bool,
+)
+
+@click.option(
+    "-sfm",
+    "--use-sfm",
+    default=False,
+    type=bool,
+)
+
 @click.option("--random-state", default=42, type=int)
 
 @click.option(
@@ -78,8 +92,8 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
 @click.option("--bootstrap", default=True, type=bool)
 
 def train(dataset_path: Path, save_model_path: Path, test_size: float, random_state: int, use_scaler: bool,
-          n_pca: int, use_threshold: bool, kfold: int, n_neighbors: int, weights: str, algorithm: str,
-          model: str, n_estimators: int, criterion: str, max_depth: int, bootstrap: bool
+          use_threshold: bool, use_kbest: bool, n_pca: int, use_sfm: bool, kfold: int, n_neighbors: int, weights: str,
+          algorithm: str, model: str, n_estimators: int, criterion: str, max_depth: int, bootstrap: bool
           ) -> None:
 
     features_train, features_val, target_train, target_val =\
@@ -88,8 +102,9 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
     with mlflow.start_run():
         mlflow.log_param("model", model)
         if model == 'rfc':
-            pipeline = create_pipeline_rfc(use_scaler=use_scaler, use_threshold=use_threshold, n_estimators=n_estimators,
-                n_pca=n_pca, criterion=criterion, max_depth=max_depth, bootstrap=bootstrap, random_state=random_state)\
+            pipeline = create_pipeline_rfc(use_scaler=use_scaler, use_threshold=use_threshold, use_kbest=use_kbest, n_pca=n_pca,
+                use_sfm=use_sfm, n_estimators=n_estimators, criterion=criterion, max_depth=max_depth, bootstrap=bootstrap,
+                random_state=random_state)\
                 .fit(features_train, target_train)
             click.echo(f"Number features after selection: {pipeline['classifier'].n_features_in_}.")
             mlflow.log_param("n_estimators", n_estimators)
@@ -97,8 +112,8 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
             mlflow.log_param("max_depth", max_depth)
             mlflow.log_param("bootstrap", bootstrap)
         else:
-            pipeline = create_pipeline_knn(use_threshold=use_threshold, use_scaler=use_scaler, n_neighbors=n_neighbors,
-                                           weights=weights, algorithm=algorithm, n_pca=n_pca) \
+            pipeline = create_pipeline_knn(use_threshold=use_threshold, use_scaler=use_scaler, use_kbest=use_kbest, n_pca=n_pca,
+                use_sfm=use_sfm, n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, random_state=random_state) \
                 .fit(features_train, target_train)
             click.echo(f"Number features after selection: {pipeline['classifier'].n_features_in_}.")
             mlflow.log_param("n_neighbors", n_neighbors)
