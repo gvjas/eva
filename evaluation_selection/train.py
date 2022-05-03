@@ -71,19 +71,24 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
         get_dataset(dataset_path, test_size, random_state)
 
     with mlflow.start_run():
-
+        mlflow.log_param("model", model)
         if model == 'rfc':
             pipeline = create_pipeline_rfc(use_scaler, n_estimators, criterion, max_depth, bootstrap)\
                 .fit(features_train, target_train)
+            mlflow.log_param("n_estimators", n_estimators)
+            mlflow.log_param("criterion", criterion)
+            mlflow.log_param("max_depth", max_depth)
+            mlflow.log_param("bootstrap", bootstrap)
         else:
             pipeline = create_pipeline_knn(use_scaler, n_neighbors, weights, algorithm) \
                 .fit(features_train, target_train)
+            mlflow.log_param("n_neighbors", n_neighbors)
+            mlflow.log_param("weights", weights)
+            mlflow.log_param("algorithm", algorithm)
 
+        mlflow.log_param("use_scaler", use_scaler)
         scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
         scores = cross_validate(pipeline, features_train, target_train, cv=KFold(kfold), scoring=scoring)
-        mlflow.log_param("n_neighbors", n_neighbors)
-        mlflow.log_param("weights", weights)
-        mlflow.log_param("algorithm", algorithm)
         mlflow.log_metric("accuracy", scores['test_accuracy'].mean())
         mlflow.log_metric("f1 score", scores['test_f1_macro'].mean())
         mlflow.log_metric("jaccard", scores['test_jaccard_macro'].mean())
