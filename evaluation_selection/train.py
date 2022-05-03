@@ -105,7 +105,9 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
             mlflow.log_param("weights", weights)
             mlflow.log_param("algorithm", algorithm)
 
+        mlflow.log_param("use_threshold", use_threshold)
         mlflow.log_param("use_scaler", use_scaler)
+        mlflow.log_param("n_pca", n_pca)
         scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
         scores = cross_validate(pipeline, features_train, target_train, cv=KFold(kfold), scoring=scoring)
         mlflow.log_metric("accuracy", scores['test_accuracy'].mean())
