@@ -8,7 +8,7 @@ import mlflow
 import mlflow.sklearn
 
 from .data import get_dataset
-from .pipeline import create_pipeline
+from .pipeline import create_pipeline_knn, create_pipeline_rfc
 
 @click.command()
 @click.option(
@@ -23,6 +23,13 @@ from .pipeline import create_pipeline
     "--save-model-path",
     default="data/model.joblib",
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
+)
+
+@click.option(
+    "-m",
+    "--model",
+    default='knn',
+    type=str,
 )
 
 @click.option(
@@ -47,14 +54,31 @@ from .pipeline import create_pipeline
 
 @click.option("--algorithm", default='auto', type=str)
 
-def train(dataset_path: Path, save_model_path: Path, test_size: float, random_state: int,
-          use_scaler: bool, kfold: int, n_neighbors: int, weights: str, algorithm: str) -> None:
+@click.option("--n-estimators", default=100, type=int)
 
-    features_train, features_val, target_train, target_val = get_dataset(dataset_path, test_size, random_state)
+@click.option("--criterion", default='gini', type=str)
+
+@click.option("--max-depth", default=None, type=int)
+
+@click.option("--bootstrap", default=True, type=bool)
+
+def train(dataset_path: Path, save_model_path: Path, test_size: float, random_state: int,
+          use_scaler: bool, kfold: int, n_neighbors: int, weights: str, algorithm: str,
+          model: str, n_estimators: int, criterion: str, max_depth: int, bootstrap: bool
+          ) -> None:
+
+    features_train, features_val, target_train, target_val =\
+        get_dataset(dataset_path, test_size, random_state)
 
     with mlflow.start_run():
-        pipeline = create_pipeline(use_scaler, n_neighbors, weights, algorithm)\
+
+        if model == 'rfc':
+            pipeline = create_pipeline_rfc(use_scaler, n_estimators, criterion, max_depth, bootstrap)\
                 .fit(features_train, target_train)
+        else:
+            pipeline = create_pipeline_knn(use_scaler, n_neighbors, weights, algorithm) \
+                .fit(features_train, target_train)
+
         scoring = ['accuracy', 'f1_macro', 'jaccard_macro']
         scores = cross_validate(pipeline, features_train, target_train, cv=KFold(kfold), scoring=scoring)
         mlflow.log_param("n_neighbors", n_neighbors)
