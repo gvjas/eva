@@ -6,6 +6,7 @@ authors = ["gvjas <gvjasch@gmail.com>"]
 
 [tool.poetry.scripts]
 train = "evaluation_selection.train:train"
+train_nested = "evaluation_selection.train_nested:train"
 
 [tool.poetry.dependencies]
 python = "^3.9"

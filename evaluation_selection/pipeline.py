@@ -3,10 +3,8 @@ from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import mutual_info_classif
+from sklearn.feature_selection import VarianceThreshold, SelectFromModel, SelectKBest, mutual_info_classif
 
-from sklearn.feature_selection import VarianceThreshold, SelectFromModel
 
 def pipe_selectors(use_threshold: bool, use_scaler: bool, use_kbest: bool, use_sfm: bool,
                    n_pca: int, random_state: int):
@@ -45,7 +43,7 @@ def create_pipeline_rfc(
         criterion: str, max_depth: int, bootstrap: bool, random_state: int
 ) -> Pipeline:
     pipeline_steps = pipe_selectors(use_threshold, use_scaler, use_kbest, use_sfm,
-                   n_pca, random_state)
+        n_pca, random_state)
 
     pipeline_steps.append(
         (
