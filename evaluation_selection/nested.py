@@ -1,20 +1,20 @@
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import GridSearchCV, KFold, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, f1_score, jaccard_score
+from typing import Dict, List, Any
 
 
 def nested_cv(
-    model,
-    X: np.array,
-    y: np.array,
-    space: dict,
+    model: object,
+    X: pd.array,
+    y: pd.array,
+    space: Dict[str, Any],
     kfold: int,
     knested: int,
     random_state: int,
-):
+) -> Dict[str, List[Any]]:
     cv_outer = KFold(n_splits=knested, shuffle=True, random_state=random_state)
-    outer_results = dict()
+    outer_results: dict[str, list[Any]] = dict()
     outer_results["test_accuracy"] = []
     outer_results["test_f1_macro"] = []
     outer_results["test_jaccard_macro"] = []

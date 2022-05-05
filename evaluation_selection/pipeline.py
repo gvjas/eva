@@ -9,7 +9,7 @@ from sklearn.feature_selection import (
     SelectKBest,
     mutual_info_classif,
 )
-from typing import Union
+from typing import Union, List, Tuple
 
 
 def pipe_selectors(
@@ -19,7 +19,7 @@ def pipe_selectors(
     use_sfm: bool,
     n_pca: int,
     random_state: int,
-):
+) -> List[Tuple[str, object]]:
     pipeline_steps = []
     if use_threshold:
         pipeline_steps.append(("threshold", VarianceThreshold(0.01)))

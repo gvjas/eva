@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple, Any
+from typing import Any
 import click
 
 import numpy as np
@@ -119,7 +119,7 @@ def train(
             click.echo(f"Number features after selection: {selector.shape}.")
         else:
             selector = features_train
-        space = dict()
+        space: dict[str, Any] = dict()
         space["n_estimators"] = range(10, 300, 10)
         # space['max_features'] = ['auto', 'sqrt', 'log2']
         # space['criterion'] = ['gini', 'entropy']
