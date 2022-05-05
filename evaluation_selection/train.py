@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import Union
 import click
 
 from sklearn.model_selection import KFold, cross_validate
@@ -36,14 +36,14 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
 @click.option(
     "-sca",
     "--use-scaler",
-    default=True,
+    default=False,
     type=bool,
 )
 
 @click.option(
     "-thresh",
     "--use-threshold",
-    default=False,
+    default=True,
     type=bool
 )
 
@@ -86,31 +86,33 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
 
 @click.option("--n-estimators", default=100, type=int)
 
+@click.option("--max-features", default="auto", type=str)
+
 @click.option("--criterion", default='gini', type=str)
 
 @click.option("--max-depth", default=None, type=int)
 
-@click.option("--bootstrap", default=True, type=bool)
+@click.option("--bootstrap", default=False, type=bool)
 
 def train(dataset_path: Path, save_model_path: Path, test_size: float, random_state: int,
           use_scaler: bool, use_threshold: bool, use_kbest: bool, n_pca: int, use_sfm: bool, kfold: int,
-          n_neighbors: int, weights: str, algorithm: str, model: str, n_estimators: int, criterion: str,
-          max_depth: int, bootstrap: bool
+          n_neighbors: int, weights: str, algorithm: str, model: str, n_estimators: int,
+          max_features: Union[float, str], criterion: str, max_depth: int, bootstrap: bool
           ) -> None:
-
-    features_train, features_val, target_train, target_val =\
-        get_dataset(dataset_path, test_size, random_state)
+    split_dataset = get_dataset(dataset_path, test_size, random_state)
+    features_train, features_val, target_train, target_val = [df.to_numpy() for df in split_dataset]
 
     with mlflow.start_run():
         mlflow.log_param("model", model.upper())
 
         if model == 'rfc':
             pipeline = create_pipeline_rfc(use_scaler=use_scaler, use_threshold=use_threshold, use_kbest=use_kbest,
-                                           n_pca=n_pca, use_sfm=use_sfm, n_estimators=n_estimators, criterion=criterion,
-                                           max_depth=max_depth, bootstrap=bootstrap, random_state=random_state)\
+                                           n_pca=n_pca, use_sfm=use_sfm, n_estimators=n_estimators,  max_features=max_features,
+                                           criterion=criterion, max_depth=max_depth, bootstrap=bootstrap, random_state=random_state)\
                                             .fit(features_train, target_train)
             click.echo(f"Number features after selection: {pipeline['classifier'].n_features_in_}.")
             mlflow.log_param("n_estimators", n_estimators)
+            mlflow.log_param("max_features", max_features)
             mlflow.log_param("criterion", criterion)
             mlflow.log_param("max_depth", max_depth)
             mlflow.log_param("bootstrap", bootstrap)

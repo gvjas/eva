@@ -4,7 +4,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold, SelectFromModel, SelectKBest, mutual_info_classif
-
+from typing import Union
 
 def pipe_selectors(use_threshold: bool, use_scaler: bool, use_kbest: bool, use_sfm: bool,
                    n_pca: int, random_state: int):
@@ -40,7 +40,7 @@ def create_pipeline_knn(
 
 def create_pipeline_rfc(
     use_scaler: bool, use_threshold: bool, use_kbest: bool, n_pca: int, use_sfm: bool, n_estimators: int,
-        criterion: str, max_depth: int, bootstrap: bool, random_state: int
+    max_features: Union[float, str], criterion: str, max_depth: int, bootstrap: bool, random_state: int
 ) -> Pipeline:
     pipeline_steps = pipe_selectors(use_threshold, use_scaler, use_kbest, use_sfm,
         n_pca, random_state)
@@ -48,8 +48,8 @@ def create_pipeline_rfc(
     pipeline_steps.append(
         (
             "classifier",
-            RandomForestClassifier(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
-                                   bootstrap=bootstrap, random_state=random_state, n_jobs=-1)
+            RandomForestClassifier(n_estimators=n_estimators,  max_features=max_features, criterion=criterion,
+                                   max_depth=max_depth, bootstrap=bootstrap, random_state=random_state, n_jobs=-1)
         )
     )
 

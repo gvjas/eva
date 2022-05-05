@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import GridSearchCV, KFold, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, f1_score, jaccard_score
 
-def nested_cv(model, X: np.array, y: pd.Series, space: dict, kfold: int, knested: int, random_state: int):
+def nested_cv(model, X: np.array, y: np.array, space: dict, kfold: int, knested: int, random_state: int):
     cv_outer = KFold(n_splits=knested, shuffle=True, random_state=random_state)
     outer_results = dict()
     outer_results['test_accuracy'] = []
@@ -12,9 +12,9 @@ def nested_cv(model, X: np.array, y: pd.Series, space: dict, kfold: int, knested
     outer_results['best_params'] = []
     for train_ix, test_ix in cv_outer.split(X):
         X_train, X_test = X[train_ix, :], X[test_ix, :]
-        y_train, y_test = y.iloc[train_ix], y.iloc[test_ix]
+        y_train, y_test = y[train_ix], y[test_ix]
         cv_inner = KFold(n_splits=kfold, shuffle=True, random_state=random_state)
-        search = GridSearchCV(model, space, scoring='accuracy', cv=cv_inner, refit=True)
+        search = RandomizedSearchCV(model, space, scoring='accuracy', cv=cv_inner, refit=True, n_jobs=-1)
         result = search.fit(X_train, y_train)
         best_model = result.best_estimator_
         yhat = best_model.predict(X_test)

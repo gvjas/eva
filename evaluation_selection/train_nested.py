@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import Tuple, Any
 import click
 
 import numpy as np
@@ -36,14 +36,14 @@ from .nested import nested_cv
 @click.option(
     "-sca",
     "--use-scaler",
-    default=True,
+    default=False,
     type=bool,
 )
 
 @click.option(
     "-thresh",
     "--use-threshold",
-    default=False,
+    default=True,
     type=bool
 )
 
@@ -78,47 +78,56 @@ from .nested import nested_cv
 
 @click.option("--kfold", default=5, type=int)
 
-@click.option("--knested", default=3, type=int)
+@click.option("--knested", default=5, type=int)
 
 @click.option("--n-neighbors", default=5, type=int)
 
-@click.option("--weights", default='uniform', type=str)
+@click.option("--weights", default='distance', type=str)
 
 @click.option("--algorithm", default='auto', type=str)
 
 @click.option("--n-estimators", default=100, type=int)
 
+@click.option("--max-features", default="auto", type=str)
+
 @click.option("--criterion", default='gini', type=str)
 
 @click.option("--max-depth", default=None, type=int)
 
-@click.option("--bootstrap", default=True, type=bool)
+@click.option("--bootstrap", default=False, type=bool)
 
 def train(dataset_path: Path, save_model_path: Path, test_size: float, random_state: int,
           use_scaler: bool, use_threshold: bool, use_kbest: bool, n_pca: int, use_sfm: bool, kfold: int, knested: int,
-          n_neighbors: int, weights: str, algorithm: str, model: str, n_estimators: int, criterion: str,
-          max_depth: int, bootstrap: bool
+          n_neighbors: int, weights: str, algorithm: str, model: str, n_estimators: int,  max_features: Any,
+          criterion: str, max_depth: int, bootstrap: bool
           ) -> None:
-
-    features_train, features_val, target_train, target_val =\
-        get_dataset(dataset_path, test_size, random_state)
+    split_dataset = get_dataset(dataset_path, test_size, random_state)
+    features_train, features_val, target_train, target_val = [df.to_numpy() for df in split_dataset]
 
     if model == 'rfc':
         pipeline = create_pipeline_rfc(use_scaler=use_scaler, use_threshold=use_threshold, use_kbest=use_kbest,
-                                       n_pca=n_pca, use_sfm=use_sfm, n_estimators=n_estimators, criterion=criterion,
-                                       max_depth=max_depth, bootstrap=bootstrap, random_state=random_state)
+                                       n_pca=n_pca, use_sfm=use_sfm, n_estimators=n_estimators, max_features=max_features,
+                                       criterion=criterion, max_depth=max_depth, bootstrap=bootstrap, random_state=random_state)
         rfc = pipeline.steps.pop()
-        selector = pipeline.fit_transform(features_train, target_train)
+        if any([use_threshold, use_scaler, use_kbest, n_pca, use_sfm]):
+            selector = pipeline.fit_transform(features_train, target_train)
+            click.echo(f"Number features after selection: {selector.shape}.")
+        else:
+            selector = features_train
         space = dict()
-        space['n_estimators'] = [10, 100]
-        space['criterion'] = ['gini', 'entropy']
-        space['max_depth'] = [20, 30]
+        space['n_estimators'] = range(10, 300, 10)
+        # space['max_features'] = ['auto', 'sqrt', 'log2']
+        # space['criterion'] = ['gini', 'entropy']
+        space['max_depth'] = range(1, 50)
         # space['bootstrap'] = [True, False]
         scores = nested_cv(rfc[1], selector, target_train, space, kfold, knested, random_state)
+        pipeline.steps.append(rfc)
+
         for i in range(knested):
             with mlflow.start_run():
                 mlflow.log_param("model", model.upper() + '_nested_cv')
                 mlflow.log_param("n_estimators", scores['best_params'][i].get('n_estimators', n_estimators))
+                mlflow.log_param("max_features", scores['best_params'][i].get('max_features', max_features))
                 mlflow.log_param("criterion", scores['best_params'][i].get('criterion', criterion))
                 mlflow.log_param("max_depth", scores['best_params'][i].get('max_depth', max_depth))
                 mlflow.log_param("bootstrap", scores['best_params'][i].get('bootstrap', bootstrap))
@@ -139,12 +148,17 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
             use_sfm=use_sfm, n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, random_state=random_state) \
             .fit(features_train, target_train)
         rfc = pipeline.steps.pop()
-        selector = pipeline.fit_transform(features_train, target_train)
+        if any([use_threshold, use_scaler, use_kbest, n_pca, use_sfm]):
+            selector = pipeline.fit_transform(features_train, target_train)
+            click.echo(f"Number features after selection: {selector.shape}.")
+        else:
+            selector = features_train
         space = dict()
-        space['n_neighbors'] = [2, 5, 7]
-        space['weights'] = ['uniform', 'distance']
+        space['n_neighbors'] = range(1, 10)
+        # space['weights'] = ['uniform', 'distance']
         space['algorithm'] = ['auto', 'ball_tree', 'kd_tree', 'brute']
         scores = nested_cv(rfc[1], selector, target_train, space, kfold, knested, random_state)
+        pipeline.steps.append(rfc)
 
         for i in range(knested):
             with mlflow.start_run():
@@ -163,6 +177,7 @@ def train(dataset_path: Path, save_model_path: Path, test_size: float, random_st
                 mlflow.log_metric("accuracy", acc)
                 mlflow.log_metric("f1 score", f1)
                 mlflow.log_metric("jaccard", jac)
+                dump(pipeline, save_model_path)
 
     with mlflow.start_run():
         acc = round(np.mean(scores['test_accuracy']), 3)
