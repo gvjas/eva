@@ -5,8 +5,10 @@ import click
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def get_dataset(dataset_path: Path, test_size: float, random_state: int) ->\
-    Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+
+def get_dataset(
+    dataset_path: Path, test_size: float, random_state: int
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     dataset = pd.read_csv(dataset_path)
     click.echo(f"Dataset shape: {dataset.shape}.")
     features = dataset.drop("Cover_Type", axis=1)
