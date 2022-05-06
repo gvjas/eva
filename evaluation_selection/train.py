@@ -62,13 +62,13 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
     default=0.00001,
     type=click.FloatRange(0, 1, min_open=True, max_open=True),
 )
-@click.option("--kfold", default=5, type=int)
-@click.option("--n-neighbors", default=5, type=int)
-@click.option("--weights", default="uniform", type=str)
-@click.option("--algorithm", default="auto", type=str)
-@click.option("--n-estimators", default=100, type=int)
-@click.option("--max-features", default="auto", type=str)
-@click.option("--criterion", default="gini", type=str)
+@click.option("--kfold", default=5, type=click.IntRange(2, 1000))
+@click.option("--n-neighbors", default=5, type=click.IntRange(1, 1000))
+@click.option("--weights", default="uniform", type=click.Choice(["uniform", "distance"]))
+@click.option("--algorithm", default="auto", type=click.Choice(['auto', 'ball_tree', 'kd_tree', 'brute']))
+@click.option("--n-estimators", default=100, type=click.IntRange(1, 10000))
+@click.option("--max-features", default="auto", type=click.Choice(["auto", "sqrt", "log2", 'None']))
+@click.option("--criterion", default="gini", type=click.Choice(["gini", "entropy"]))
 @click.option("--max-depth", default=None, type=int)
 @click.option("--bootstrap", default=False, type=bool)
 def train(
