@@ -29,7 +29,7 @@ from .nested import nested_cv
     "-m",
     "--model",
     default="knn",
-    type=str,
+    type=click.Choice(["knn", "rfc"]),
 )
 @click.option(
     "-sca",

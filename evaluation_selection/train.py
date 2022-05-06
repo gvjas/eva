@@ -29,7 +29,7 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
     "-m",
     "--model",
     default="knn",
-    type=str,
+    type=click.Choice(["knn", "rfc"]),
 )
 @click.option(
     "-sca",
