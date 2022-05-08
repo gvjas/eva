@@ -87,3 +87,4 @@ flake8 evaluation_selection tests
 
 Github action that runs tests and linters
 
+![Github_action example](./Github_action.png)
