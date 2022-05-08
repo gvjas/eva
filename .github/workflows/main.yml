@@ -27,7 +27,7 @@ jobs:
       run: poetry run pytest -v
     - name: Linting
       run: |
-        poetry run black --line-length 79 evaluation_selection tests
+        poetry run black --check --line-length 79 evaluation_selection tests
         flake8 .
     - name: Typing
       run: poetry run mypy evaluation_selection tests
