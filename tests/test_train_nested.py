@@ -5,6 +5,12 @@ from click.testing import CliRunner
 import pytest
 
 from evaluation_selection.train_nested import train
+import pandas as pd
+import numpy as np
+from sklearn.datasets import make_multilabel_classification
+
+X, y = make_multilabel_classification(random_state=42)
+df = pd.DataFrame(np.c_[X, y.sum(axis=1)])
 
 
 def test_version() -> None:
@@ -32,11 +38,17 @@ def test_error_for_invalid_kfold(runner: CliRunner) -> None:
 
 def test_for_valid_knested(runner: CliRunner) -> None:
     """It valid when test knested is equal 1."""
-    result = runner.invoke(
-        train,
-        [
-            "--knested",
-            "1",
-        ],
-    )
+    with runner.isolated_filesystem():
+        df.to_csv("test_random.csv")
+        result = runner.invoke(
+            train,
+            [
+                "--dataset-path",
+                "test_random.csv",
+                "--save-model-path",
+                "test_model.joblib",
+                "--knested",
+                "1",
+            ],
+        )
     assert result.exit_code == 1

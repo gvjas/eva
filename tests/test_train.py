@@ -9,6 +9,10 @@ from joblib import load
 
 from evaluation_selection.train import train
 from evaluation_selection.data import get_dataset
+from sklearn.datasets import make_multilabel_classification
+
+X, y = make_multilabel_classification(random_state=42)
+df = pd.DataFrame(np.c_[X, y.sum(axis=1)])
 
 
 def test_version() -> None:
@@ -42,22 +46,26 @@ def test_error_for_invalid_kfold(runner: CliRunner) -> None:
 
 def test_for_valid_kfold(runner: CliRunner) -> None:
     """It fails when test kfold is greater than 1."""
-    result = runner.invoke(
-        train,
-        [
-            "--kfold",
-            "3",
-        ],
-    )
+    with runner.isolated_filesystem():
+
+        df.to_csv("test_random.csv")
+        result = runner.invoke(
+            train,
+            [
+                "--dataset-path",
+                "test_random.csv",
+                "--save-model-path",
+                "test_model.joblib",
+                "--kfold",
+                "3",
+            ],
+        )
     assert result.exit_code == 0
 
 
 def test_for_save_model_with_isolated_filesystem(runner: CliRunner) -> None:
     with runner.isolated_filesystem():
-        from sklearn.datasets import make_multilabel_classification
 
-        X, y = make_multilabel_classification(random_state=42)
-        df = pd.DataFrame(np.c_[X, y.sum(axis=1)])
         df.to_csv("test_random.csv")
         X_train, X_val, y_train, y_val = get_dataset(
             Path("test_random.csv"), test_size=0.1, random_state=42
