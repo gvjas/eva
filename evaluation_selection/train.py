@@ -9,7 +9,7 @@ import mlflow
 import mlflow.sklearn
 
 from .data import get_dataset
-from .pipeline import create_pipeline_knn, create_pipeline_rfc
+from .pipeline import                                                                              create_pipeline_knn, create_pipeline_rfc
 
 
 @click.command()
