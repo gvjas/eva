@@ -2,15 +2,16 @@ name: CI Pipeline for summarize_df
 
 on:
   - push
-  - pull_request
+#   - pull_request
 
 jobs:
   build:
     runs-on: ${{matrix.platform}}
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.9]
+        platform: [ubuntu-latest]
+#         , macos-latest, windows-latest]
+        python-version: [3.9.6]
 
     steps:
     - uses: actions/checkout@v1
