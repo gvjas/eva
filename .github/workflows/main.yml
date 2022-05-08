@@ -53,5 +53,7 @@ jobs:
         run: |
           source .venv/bin/activate
           pytest tests/
-          poerty run black tests
+          poetry run black eveluation_selection tests
+          poetry run mypy eveluation_selection tests
+
 
