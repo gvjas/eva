@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from sklearn.datasets import make_multilabel_classification
 
-X, y = make_multilabel_classification(random_state=42)
+X, y = make_multilabel_cl                                                                                                  assification(random_state=42)
 df = pd.DataFrame(np.c_[X, y.sum(axis=1)])
 
 
