@@ -9,7 +9,7 @@ from joblib import load
 
 from evaluation_selection.train import train
 from evaluation_selection.data import get_dataset
-from sklearn.datasets import make_multilabel_classification
+from sklearn                                                                               .datasets import make_multilabel_classification
 
 X, y = make_multilabel_classification(random_state=42)
 df = pd.DataFrame(np.c_[X, y.sum(axis=1)])
