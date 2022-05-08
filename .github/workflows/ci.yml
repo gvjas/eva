@@ -1,0 +1,30 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{matrix.platform}}
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+        python-version: [3.9.6]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install poetry flake8
+        poetry install
+    - name: Tests
+      run: poetry run pytest -v
+    - name: Linting
+      run: |
+        poetry run black --check --line-length 79 evaluation_selection tests
+        flake8 .
+    - name: Typing
+      run: poetry run mypy evaluation_selection tests

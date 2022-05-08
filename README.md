@@ -18,8 +18,8 @@ poetry install --no-dev
 ```sh
 poetry run train -d <path to csv with data> -s <path to save trained model>
 ```
-default model KNeighborsClassifier 
-for the model RandomForestClassifier
+default model KNeighborsClassifier  
+- for the model RandomForestClassifier
 ```sh
 poetry run train -m rfc
 ```
@@ -28,8 +28,8 @@ poetry run train -m rfc
 ```sh
 poetry run train_nested -d <path to csv with data> -s <path to save trained model>
 ```
-default model KNeighborsClassifier 
-for the model RandomForestClassifier
+default model KNeighborsClassifier  
+- for the model RandomForestClassifier
 ```sh
 poetry run train_nested -m rfc
 ```
@@ -80,9 +80,10 @@ tox -[r]s mypy
 poetry run mypy evaluation_selection tests
 ```
 
-Linting with [Flake8](https://flake8.pycqa.org/en/latest/) by using either flake8 or tox or poetry:
+Linting with [Flake8](https://flake8.pycqa.org/en/latest/) by using either flake8:
 ```
 flake8 evaluation_selection tests
 ```
 
-For the git push create actions
+Github action that runs tests and linters
+
