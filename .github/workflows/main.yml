@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install poetry flake8
-        poetry install
+        poetry install --no-interaction --no-root
     - name: Tests
       run: poetry run pytest -v
     - name: Linting
