@@ -64,11 +64,23 @@ from .pipeline import create_pipeline_knn, create_pipeline_rfc
 )
 @click.option("--kfold", default=5, type=click.IntRange(2, 1000))
 @click.option("--n-neighbors", default=5, type=click.IntRange(1, 1000))
-@click.option("--weights", default="uniform", type=click.Choice(["uniform", "distance"]))
-@click.option("--algorithm", default="auto", type=click.Choice(['auto', 'ball_tree', 'kd_tree', 'brute']))
+@click.option(
+    "--weights", default="uniform", type=click.Choice(["uniform", "distance"])
+)
+@click.option(
+    "--algorithm",
+    default="auto",
+    type=click.Choice(["auto", "ball_tree", "kd_tree", "brute"]),
+)
 @click.option("--n-estimators", default=100, type=click.IntRange(1, 10000))
-@click.option("--max-features", default="auto", type=click.Choice(["auto", "sqrt", "log2", 'None']))
-@click.option("--criterion", default="gini", type=click.Choice(["gini", "entropy"]))
+@click.option(
+    "--max-features",
+    default="auto",
+    type=click.Choice(["auto", "sqrt", "log2", "None"]),
+)
+@click.option(
+    "--criterion", default="gini", type=click.Choice(["gini", "entropy"])
+)
 @click.option("--max-depth", default=None, type=int)
 @click.option("--bootstrap", default=False, type=bool)
 def train(
@@ -115,7 +127,8 @@ def train(
                 random_state=random_state,
             ).fit(features_train, target_train)
             click.echo(
-                f"Number features after selection: {pipeline['classifier'].n_features_in_}."
+                f"Number features after selection: "
+                f"{pipeline['classifier'].n_features_in_}."
             )
             mlflow.log_param("n_estimators", n_estimators)
             mlflow.log_param("max_features", max_features)
@@ -136,7 +149,8 @@ def train(
                 random_state=random_state,
             ).fit(features_train, target_train)
             click.echo(
-                f"Number features after selection: {pipeline['classifier'].n_features_in_}."
+                f"Number features after selection: "
+                f"{pipeline['classifier'].n_features_in_}."
             )
             mlflow.log_param("n_neighbors", n_neighbors)
             mlflow.log_param("weights", weights)
@@ -149,7 +163,11 @@ def train(
         mlflow.log_param("use_kbest", use_kbest)
         scoring = ["accuracy", "f1_macro", "jaccard_macro"]
         scores = cross_validate(
-            pipeline, features_train, target_train, cv=KFold(kfold), scoring=scoring
+            pipeline,
+            features_train,
+            target_train,
+            cv=KFold(kfold),
+            scoring=scoring,
         )
         acc = round(np.mean(scores["test_accuracy"]), 3)
         f1 = round(np.mean(scores["test_f1_macro"]), 3)

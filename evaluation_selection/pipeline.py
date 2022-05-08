@@ -54,7 +54,10 @@ def create_pipeline_knn(
         (
             "classifier",
             KNeighborsClassifier(
-                n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, n_jobs=-1
+                n_neighbors=n_neighbors,
+                weights=weights,
+                algorithm=algorithm,
+                n_jobs=-1,
             ),
         )
     )

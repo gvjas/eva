@@ -65,11 +65,23 @@ from .nested import nested_cv
 @click.option("--kfold", default=5, type=click.IntRange(2, 1000))
 @click.option("--knested", default=5, type=click.IntRange(1, 1000))
 @click.option("--n-neighbors", default=5, type=click.IntRange(1, 1000))
-@click.option("--weights", default="uniform", type=click.Choice(["uniform", "distance"]))
-@click.option("--algorithm", default="auto", type=click.Choice(['auto', 'ball_tree', 'kd_tree', 'brute']))
+@click.option(
+    "--weights", default="uniform", type=click.Choice(["uniform", "distance"])
+)
+@click.option(
+    "--algorithm",
+    default="auto",
+    type=click.Choice(["auto", "ball_tree", "kd_tree", "brute"]),
+)
 @click.option("--n-estimators", default=100, type=click.IntRange(1, 10000))
-@click.option("--max-features", default="auto", type=click.Choice(["auto", "sqrt", "log2", 'None']))
-@click.option("--criterion", default="gini", type=click.Choice(["gini", "entropy"]))
+@click.option(
+    "--max-features",
+    default="auto",
+    type=click.Choice(["auto", "sqrt", "log2", "None"]),
+)
+@click.option(
+    "--criterion", default="gini", type=click.Choice(["gini", "entropy"])
+)
 @click.option("--max-depth", default=None, type=int)
 @click.option("--bootstrap", default=False, type=bool)
 def train(
@@ -142,13 +154,16 @@ def train(
                     scores["best_params"][i].get("max_features", max_features),
                 )
                 mlflow.log_param(
-                    "criterion", scores["best_params"][i].get("criterion", criterion)
+                    "criterion",
+                    scores["best_params"][i].get("criterion", criterion),
                 )
                 mlflow.log_param(
-                    "max_depth", scores["best_params"][i].get("max_depth", max_depth)
+                    "max_depth",
+                    scores["best_params"][i].get("max_depth", max_depth),
                 )
                 mlflow.log_param(
-                    "bootstrap", scores["best_params"][i].get("bootstrap", bootstrap)
+                    "bootstrap",
+                    scores["best_params"][i].get("bootstrap", bootstrap),
                 )
                 mlflow.log_param("use_threshold", use_threshold)
                 mlflow.log_param("use_scaler", use_scaler)
@@ -200,7 +215,8 @@ def train(
                     "weights", scores["best_params"][i].get("weights", weights)
                 )
                 mlflow.log_param(
-                    "algorithm", scores["best_params"][i].get("algorithm", algorithm)
+                    "algorithm",
+                    scores["best_params"][i].get("algorithm", algorithm),
                 )
                 mlflow.log_param("use_threshold", use_threshold)
                 mlflow.log_param("use_scaler", use_scaler)

@@ -6,8 +6,9 @@ import pytest
 
 from evaluation_selection.train_nested import train
 
-def test_version():
-    assert __version__ == '0.1.0'
+
+def test_version() -> None:
+    assert __version__ == "0.1.0"
 
 
 @pytest.fixture
@@ -22,7 +23,7 @@ def test_error_for_invalid_kfold(runner: CliRunner) -> None:
         train,
         [
             "--kfold",
-            'str',
+            "str",
         ],
     )
     assert result.exit_code == 2
@@ -35,7 +36,7 @@ def test_for_valid_knested(runner: CliRunner) -> None:
         train,
         [
             "--knested",
-            1,
+            "1",
         ],
     )
     assert result.exit_code == 1

@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import GridSearchCV, KFold, RandomizedSearchCV
+from sklearn.model_selection import KFold, RandomizedSearchCV  # GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, jaccard_score
 from typing import Dict, List, Any
 
@@ -22,9 +22,16 @@ def nested_cv(
     for train_ix, test_ix in cv_outer.split(X):
         X_train, X_test = X[train_ix, :], X[test_ix, :]
         y_train, y_test = y[train_ix], y[test_ix]
-        cv_inner = KFold(n_splits=kfold, shuffle=True, random_state=random_state)
+        cv_inner = KFold(
+            n_splits=kfold, shuffle=True, random_state=random_state
+        )
         search = RandomizedSearchCV(
-            model, space, scoring="accuracy", cv=cv_inner, refit=True, n_jobs=-1
+            model,
+            space,
+            scoring="accuracy",
+            cv=cv_inner,
+            refit=True,
+            n_jobs=-1,
         )
         result = search.fit(X_train, y_train)
         best_model = result.best_estimator_
