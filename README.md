@@ -1,3 +1,5 @@
+[![Tests](https://github.com/gvjas/eva/workflows/Tests/badge.svg)](https://github.com/gvjas/eva/actions?workflow=Tests)
+
 Create project with "poetry new" where have structure and config file pyproject.toml
 
 Homework for RS School Machine Learning course.
